@@ -47,5 +47,5 @@ class Verification(commands.Cog):
 
 # Add our COG if its enabled.
 def setup(bot):
-    if True if config["VERIFY"]["enabled"] == "true" else False:
+    if config["VERIFY"]["enabled"] == "true":
         bot.add_cog(Verification(bot))

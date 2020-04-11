@@ -44,5 +44,5 @@ class Welcomer(commands.Cog):
 
 # Add our COG if its enabled.
 def setup(bot):
-    if True if config["WELCOME"]["enabled"] == "true" else False:
+    if config["WELCOME"]["enabled"] == "true":
         bot.add_cog(Welcomer(bot))
