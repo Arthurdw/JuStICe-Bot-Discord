@@ -1,6 +1,5 @@
 # Import base libraries.
 from glob import glob
-from sys import stdout
 from os import system, name
 from discord.ext import commands
 from BeatPy.discord import formatter
@@ -33,6 +32,9 @@ def read_config(file):
 
 # Our main bot object.
 class Manager(commands.Bot):
+    # Just a setup var that is temp.
+    pre = []
+
     # Initialize the whole bot.
     def __init__(self):
         # Initialize the config files:
@@ -51,22 +53,21 @@ class Manager(commands.Bot):
 
     # Add a module to the loaded extensions.
     def load_module(self, module: str):
-        system(clear)
         module_name = module.replace('modules' + back_slash, '')[:-3]
-        print(f"Loaded extensions:\n{', '.join(list(self.cogs))}")
-        print(f"Started loading: '{module_name}'", end=" ")
+        print(f"Started loading: '{module_name}'")
         self.load_extension(module.replace(back_slash, '.')[:-3])
-        if module_name in list(self.cogs):
-            print("\r", f"\rLoaded: '{module_name}' {' '*50}")
-        else:
-            print("\r", f"\rFailed to load: '{module_name}' {' '*50}\nMaybe disabled in the config file?")
-        stdout.flush()
+        load = f"\rLoaded: '{module_name}'{' '*50}"
+        if module_name not in list(self.cogs):
+            load = f"\rFailed to load: '{module_name}' - disabled in config? {' '*50}"
+        self.pre.append(load)
+        system(clear)
+        print(f"Loaded extensions:\n{', '.join(list(self.cogs))}")
+        for item in self.pre:
+            print(item)
 
     # When the bot is ready we will print out information about the current client.
     async def on_ready(self):
-        system(clear)
-        print(f"Loaded extensions:\n{', '.join(list(self.cogs))}\n")
-        print(f"+{'='*40}+")
+        print(f"\n+{'='*40}+")
         print(f"Started bot on {self.user.name}!")
         print(f"Running on app with ID: {self.user.id}")
         print(f"+{'='*40}+")
