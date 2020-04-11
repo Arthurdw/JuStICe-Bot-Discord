@@ -73,8 +73,18 @@ class Manager(commands.Bot):
 
     # Prevent the bot from reacting on other bots.
     async def on_message(self, message):
-        if message.author.bot or message.guild.id != int(config["GENERAL"]["main"]):
+        if message.author.bot:
             return
+        ctx = await self.get_context(message)
+        if ctx.valid:
+            if message.guild.id != int(config["GENERAL"]["main"]):
+                try:
+                    message.channel.send(**em("Hey, I'm a private bot.\n"
+                                              "Want to have this bot in your server?\n"
+                                              "Feel free to host the bot yourself.\n"
+                                              "Download the LTS [here](https://github.com/Arthurdw/JuStICe-Bot-Discord)"))
+                except Exception:
+                    pass
         await self.process_commands(message)
 
     # Start the bot.

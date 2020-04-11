@@ -24,14 +24,17 @@ class Welcomer(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member):
         # Send a message to the channel when a member joins.
-        await self.channel.send(**em(mr(self.message, member).replace("{membercount}", str(len(member.guild.members)))))
+        if member.guild.id == int(config["GENERAL"]["main"]):
+            await self.channel.send(**em(mr(self.message, member).replace("{membercount}",
+                                                                          str(len(member.guild.members)))))
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         # Check if we need to send a message!
         if self.leave_enabled:
-            await self.channel.send(**em(mr(self.leave, member).replace("{membercount}",
-                                                                        str(len(member.guild.members)))))
+            if member.guild.id == int(config["GENERAL"]["main"]):
+                await self.channel.send(**em(mr(self.leave, member).replace("{membercount}",
+                                                                            str(len(member.guild.members)))))
 
     @commands.Cog.listener()
     async def on_ready(self):
