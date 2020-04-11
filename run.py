@@ -6,9 +6,6 @@ from discord.ext import commands
 from BeatPy.discord import formatter
 from configparser import ConfigParser
 
-# Create config objects
-config = ConfigParser()
-token = ConfigParser()
 
 # Setup BeatPy embeds.
 embed_setup = formatter.Embed(footer=False, timestamp=False)
@@ -21,6 +18,10 @@ clear, back_slash = "clear", "/"
 if name == "nt":
     clear, back_slash = "cls", "\\"
 
+# Create config objects
+token = ConfigParser()
+config = ConfigParser()
+
 
 # Read the config file using a function.
 # This way we are able to create a reload command which will reload the config files without having to restart the bot.
@@ -32,9 +33,6 @@ def read_config(file):
 
 # Our main bot object.
 class Manager(commands.Bot):
-    # Save data to our class var.
-    loaded_modules = []
-
     # Initialize the whole bot.
     def __init__(self):
         # Initialize the config files:
@@ -55,25 +53,27 @@ class Manager(commands.Bot):
     def load_module(self, module: str):
         system(clear)
         module_name = module.replace('modules' + back_slash, '')[:-3]
-        print(f"Loaded extensions:\n{', '.join(self.loaded_modules)}")
+        print(f"Loaded extensions:\n{', '.join(list(self.cogs))}")
         print(f"Started loading: '{module_name}'", end=" ")
         self.load_extension(module.replace(back_slash, '.')[:-3])
-        print("\r", f"Loaded loading: '{module_name}' ")
+        if module_name in list(self.cogs):
+            print("\r", f"\rLoaded: '{module_name}' {' '*50}")
+        else:
+            print("\r", f"\rFailed to load: '{module_name}' {' '*50}\nMaybe disabled in the config file?")
         stdout.flush()
-        self.loaded_modules += module_name
 
     # When the bot is ready we will print out information about the current client.
     async def on_ready(self):
         system(clear)
-        print(f"Loaded extensions:\n{', '.join(self.loaded_modules)}")
-        print(f"+{'='*20}+")
+        print(f"Loaded extensions:\n{', '.join(list(self.cogs))}\n")
+        print(f"+{'='*40}+")
         print(f"Started bot on {self.user.name}!")
         print(f"Running on app with ID: {self.user.id}")
-        print(f"+{'='*20}+")
+        print(f"+{'='*40}+")
 
     # Prevent the bot from reacting on other bots.
     async def on_message(self, message):
-        if message.author.bot:
+        if message.author.bot or message.guild.id != int(config["GENERAL"]["main"]):
             return
         await self.process_commands(message)
 
