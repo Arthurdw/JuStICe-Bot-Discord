@@ -36,7 +36,10 @@ class ReactionRole(commands.Cog):
                 else:
                     member = self.main.get_member(member)
                     await member.remove_roles(role)
-                await member.send(**em(f"You have successfully {reaction_type} the {role.name} in {self.main.name}"))
+                try:
+                    await member.send(**em(f"You have successfully {reaction_type} the {role.name} in {self.main.name}"))
+                except Exception:
+                    pass
 
     # Create on reaction add:
     @commands.Cog.listener()
