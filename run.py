@@ -4,6 +4,7 @@ from os import system, name
 from discord.ext import commands
 from BeatPy.discord import formatter
 from configparser import ConfigParser
+from discord import NotFound, Forbidden, errors
 
 
 # Setup BeatPy embeds.
@@ -22,14 +23,6 @@ token = ConfigParser()
 config = ConfigParser()
 
 
-# Read the config file using a function.
-# This way we are able to create a reload command which will reload the config files without having to restart the bot.
-def read_config(file):
-    # Since our token (secret) file isn't going to change we only need to be able to reload the config file.
-    # Its impossible to have your bot running with an invalid token.
-    config.read(f"settings{back_slash}{file}.cfg")
-
-
 # Our main bot object.
 class Manager(commands.Bot):
     # Just a setup var that is temp.
@@ -39,7 +32,7 @@ class Manager(commands.Bot):
     def __init__(self):
         # Initialize the config files:
         token.read(f"settings{back_slash}secret.cfg")
-        read_config("config")
+        config.read(f"settings{back_slash}config.cfg")
 
         # Initialize our bot:
         super().__init__(command_prefix=config["GENERAL"]["prefix"],
@@ -91,6 +84,20 @@ class Manager(commands.Bot):
     # Start the bot.
     def run(self):
         super().run(token["TOKEN"]["token"], reconnect=True)
+
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, (NotFound, commands.errors.CommandNotFound)):
+            return
+        elif isinstance(error, (Forbidden, errors.Forbidden)):
+            pass
+        elif isinstance(error, (TypeError, commands.MissingRequiredArgument)):
+            await ctx.send(**em(f"Missing argument(s) for the '{ctx.command.qualified_name}' command.\n"
+                                f"Use the command like this:\n!{ctx.command.qualified_name} "
+                                f"{' '.join(ctx.command.clean_params)}"))
+        elif isinstance(error, commands.MissingAnyRole):
+            await ctx.send(**em("You are missing the required permissions/role!"))
+        else:
+            raise error
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 # Import required libraries:
-from run import em, field
+import time
+from glob import glob
+from run import em, back_slash
 from discord.ext import commands
 
 
@@ -22,6 +24,17 @@ class General(commands.Cog):
         if message is None:  # If no message was provided lets tell them they need to provide one.
             return await ctx.send(**em("Please provide a message, example usage:\n`!say hello`"))
         await ctx.send(**em(message))
+
+    @commands.is_owner()
+    @commands.command()
+    async def reload(self, ctx):
+        """Reload the bot."""
+        msg = await ctx.send(**em("Started reloading the bot..."))
+        first = time.perf_counter()
+        for module in sorted(glob("modules/*.py")):
+            self.bot.reload_extension(module.replace(back_slash, '.')[:-3])
+        last = time.perf_counter()
+        await msg.edit(**em(f"Successfully reloaded the bot!\nIt took `{round((last-first)*1000, 2)}ms`"))
 
 
 # Always add this COG!
